@@ -30,7 +30,7 @@ public class ElevatorScene {
 	private int numberOfFloors;
 	private int numberOfElevators;
 	
-	private Thread elevatorThread; //= NULL;
+	private Thread elevatorThread = null	;
 	
 	ArrayList<Integer> personCount; //use if you want but
 									//throw away and
@@ -63,22 +63,7 @@ public class ElevatorScene {
 		personCountMutex = new Semaphore(1); //einn kemst i gegn og læsist svo
 		elevatorWaitMutex = new Semaphore(1);
 		
-		elevatorThread = new Thread(new Runnable(){
-			
-			@Override
-			public void run() {
-				
-				while(true){
-					if(ElevatorScene.elevatorMayDie ){
-						return;
-					}
-					for(int i = 0; i < 16; i++){
-					ElevatorScene.floorQueue.release();//signal
-					}	
-				}
-				
-			}
-		});
+		elevatorThread = new Thread();
 		elevatorThread.start();
 		
 		/**
@@ -117,7 +102,8 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public Thread addPerson(int sourceFloor, int destinationFloor) {
  
-		Thread thread = new Thread(new Person(sourceFloor, destinationFloor));
+		Person person = new Person(sourceFloor, destinationFloor);
+		Thread thread = new Thread(person);
 		thread.start();
 		
 		/**
@@ -127,7 +113,9 @@ public class ElevatorScene {
 		 * Also return the Thread object for your person
 		 * so that it can be reaped in the testSuite
 		 * (you don't have to join() yourself)
-		 */
+		 */	
+		
+		
 
 		//dumb code, replace it!
 		incrementNumberOfPeopleWaitingAtFloor(sourceFloor);
@@ -217,28 +205,28 @@ public class ElevatorScene {
 		return (getNumberOfPeopleWaitingAtFloor(floor) > 0);
 	}
 
-		ArrayList<Integer> exitedCount = null;
-		public static Semaphore exitedCountMutex;
+	ArrayList<Integer> exitedCount = null;
+	public static Semaphore exitedCountMutex;
 
-		public void personExitsAtFloor(int floor) {
-			try {
-				
-				exitedCountMutex.acquire();
+	public void personExitsAtFloor(int floor) {
+		try {
+			
+			exitedCountMutex.acquire();
 				exitedCount.set(floor, (exitedCount.get(floor) + 1));
-				exitedCountMutex.release();
+			exitedCountMutex.release();
 
-			} catch (InterruptedException e) {
+		} 
+		catch (InterruptedException e) {
 				e.printStackTrace();
-			}
 		}
+	}
 
-		public int getExitedCountAtFloor(int floor) {
-			if(floor < getNumberOfFloors()) {
-				return exitedCount.get(floor);
-			}
-			else {
-				return 0;
-			}
+	public int getExitedCountAtFloor(int floor) {
+		if(floor < getNumberOfFloors()) {
+			return exitedCount.get(floor);
 		}
-
+		else {
+			return 0;
+		}
+	}
 }
