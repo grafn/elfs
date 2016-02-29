@@ -58,7 +58,7 @@ public class ElevatorGraphics implements ApplicationListener{
 
 		Gdx.gl11.glColor4f(0.6f, 0.0f, 0.0f, 1.0f);
 		Gdx.gl11.glPushMatrix();
-		Gdx.gl11.glTranslatef(-30f, -50f, 0.0f);
+		Gdx.gl11.glTranslatef(350f, -50f, 0.0f);
 
 		for(int elevatorNum = 0; elevatorNum < elevatorScene.getNumberOfElevators(); elevatorNum++) {
 
@@ -121,17 +121,54 @@ public class ElevatorGraphics implements ApplicationListener{
 			Gdx.gl11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4);
 			Gdx.gl11.glPopMatrix();
 			Gdx.gl11.glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+			Gdx.gl11.glTranslatef(0.0f, 60.0f, 0.0f);
 			for(int peopleNum = 0; peopleNum < elevatorScene.getNumberOfPeopleWaitingAtFloor(floorNum); peopleNum++) {
 
-				Gdx.gl11.glTranslatef(30.0f, 0f, 0.0f);
+				int mod = peopleNum % 4;
+				switch(mod) {
+				case 0:
+					Gdx.gl11.glTranslatef(20.0f, -60.0f, 0.0f);
+					break;
+				case 1: case 2: case 3:
+					Gdx.gl11.glTranslatef(0.0f, 20.0f, 0.0f);
+					break;
+				}
 				Gdx.gl11.glPushMatrix();
-				Gdx.gl11.glScalef(20.0f, 20.0f, 100.0f);
+				Gdx.gl11.glScalef(15.0f, 15.0f, 100.0f);
 				Gdx.gl11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4);
 				Gdx.gl11.glPopMatrix();
 			}
 			Gdx.gl11.glPopMatrix();
 		}
 
+		Gdx.gl11.glPopMatrix();
+
+		Gdx.gl11.glPushMatrix();
+		Gdx.gl11.glTranslatef(400.0f, -80f, 0.0f);
+		for(int floorNum = 0; floorNum < elevatorScene.getNumberOfFloors(); floorNum++) {
+
+			Gdx.gl11.glTranslatef(0.0f, 110f, 0.0f);
+			Gdx.gl11.glPushMatrix();
+			Gdx.gl11.glTranslatef(0.0f, 60f, 0.0f);
+			Gdx.gl11.glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+			for(int peopleNum = 0; peopleNum < elevatorScene.getExitedCountAtFloor(floorNum); peopleNum++) {
+
+				int mod = peopleNum % 4;
+				switch(mod) {
+				case 0:
+					Gdx.gl11.glTranslatef(-20.0f, -60.0f, 0.0f);
+					break;
+				case 1: case 2: case 3:
+					Gdx.gl11.glTranslatef(0.0f, 20.0f, 0.0f);
+					break;
+				}
+				Gdx.gl11.glPushMatrix();
+				Gdx.gl11.glScalef(15.0f, 15.0f, 100.0f);
+				Gdx.gl11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, 4);
+				Gdx.gl11.glPopMatrix();
+			}
+			Gdx.gl11.glPopMatrix();
+		}
 		Gdx.gl11.glPopMatrix();
 
 	}
