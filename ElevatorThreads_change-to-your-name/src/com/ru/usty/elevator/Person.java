@@ -3,7 +3,9 @@ package com.ru.usty.elevator;
 public class Person implements Runnable{
 
 	int sourceFloor, destinationFloor;
+	
 	public Person(int sourceFloor, int destinationFloor){
+		
 		this.sourceFloor = sourceFloor;
 		this.destinationFloor = destinationFloor;
 	}
@@ -12,17 +14,24 @@ public class Person implements Runnable{
 	@Override
 	public void run() {
 		try {
-			ElevatorScene.elevatorWaitMutex.acquire();
-				ElevatorScene.floorQueue.acquire(); //wait for elevator to arrive
-			ElevatorScene.elevatorWaitMutex.release();
+				ElevatorScene.floorQueueInSemaphore[this.sourceFloor].acquire(); 
+			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		//Person is through
-		ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(sourceFloor);
+		ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(this.sourceFloor);
 		
-		System.out.println("Person thread released");
+		//Person enters elevator
+		ElevatorScene.scene.ElevatorRiders++; //Kannski gera í sér falli með mutex
+		ElevatorScene.scene.PeopleCountForDestFloor[this.destinationFloor]++;
+
+		//Person exits elevator
+		ElevatorScene.scene.ElevatorRiders--; //Kannski gera í sér falli með mutex
+		ElevatorScene.scene.PeopleCountForDestFloor[this.destinationFloor]--;
+		
+		ElevatorScene.scene.personExitsAtFloor(this.destinationFloor);
 	}
 
 }

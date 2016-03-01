@@ -13,7 +13,9 @@ import java.util.concurrent.Semaphore;
 
 public class ElevatorScene {
 
-	public static Semaphore floorQueue; 
+	public static Semaphore[] floorQueueInSemaphore;
+	
+	public static Semaphore[] GetTheHellOutSemaphore;
 	
 	public static Semaphore personCountMutex;
 	
@@ -21,16 +23,35 @@ public class ElevatorScene {
 	
 	public static ElevatorScene scene;
 	
-	public static boolean elevatorMayDie;
+	public boolean elevatorMayDie;
+	
+	public int elevatorLocation = 0; // Gera array af location vísum til að geta unnið með margar lyftur í einu
+	
+	public int ElevatorRiders = 0;// Gera array fyrir riders
+	
+	public void MoveElevatorUp() {
+		elevatorLocation++;
+	}
+	
+	public void MoveElevatorDown() {
+		elevatorLocation--;
+	}
+	
+	public int[] PeopleCountForDestFloor;
+	
 	
 	//TO SPEED THINGS UP WHEN TESTING,
 	//feel free to change this.  It will be changed during grading
-	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
+	public static final int VISUALIZATION_WAIT_TIME = 2000;  //milliseconds
 
 	private int numberOfFloors;
 	private int numberOfElevators;
 	
-	private Thread elevatorThread = null	;
+	//private Thread elevatorThread = null	;
+	
+	
+	
+	private Elevator[] elevators; //= new Elevator[numberOfElevators];
 	
 	ArrayList<Integer> personCount; //use if you want but
 									//throw away and
@@ -41,30 +62,51 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 		
-		elevatorMayDie = true;
+//		if(elevatorThread != null){   			// TODO: LOKA ÞEIM ELEVATOR ÞRÁÐUM SEM TIL ERU
+//			if(elevatorThread.isAlive()){
+//				
+//				try {
+//					elevatorThread.join();
+//					
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 		
-		if(elevatorThread != null){
-			if(elevatorThread.isAlive()){
-				
-				try {
-					elevatorThread.join();
-					
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		elevatorMayDie = false;  
- 
+		elevatorMayDie = true;
+
 		scene = this;
 		
-		floorQueue= new Semaphore(0); //læst í upphafi
+		elevators = new Elevator[numberOfElevators];
+		//elevatorThread = new Thread();
+		
+		floorQueueInSemaphore = new Semaphore[numberOfFloors];
+		GetTheHellOutSemaphore = new Semaphore[numberOfFloors];
+		
+		for( int n = 0; n < numberOfElevators; n++) {
+			elevators[n] = addElevator();
+			System.out.println("Elevator nr.: " + n + " búin til");
+		}
+		
+		for(int i = 0; i < numberOfFloors; i++) {
+			floorQueueInSemaphore[i] = new Semaphore(0);
+		}
+		
+		for(int i = 0; i < numberOfFloors; i++) {
+			GetTheHellOutSemaphore[i] = new Semaphore(0);
+		}
+
+		elevatorMayDie = false;  
+ 
+		
+		//floorQueue = new Semaphore(0); //læst í upphafi
 		personCountMutex = new Semaphore(1); //einn kemst i gegn og læsist svo
 		elevatorWaitMutex = new Semaphore(1);
 		
-		elevatorThread = new Thread();
-		elevatorThread.start();
+//		elevatorThread = new Thread();
+//		elevatorThread.start();
 		
 		/**
 		 * Important to add code here to make new
@@ -95,7 +137,6 @@ public class ElevatorScene {
 			this.exitedCount.add(0);
 		}
 		exitedCountMutex = new Semaphore(1);
-		
 	}
 
 	//Base function: definition must not change
@@ -119,26 +160,36 @@ public class ElevatorScene {
 
 		//dumb code, replace it!
 		incrementNumberOfPeopleWaitingAtFloor(sourceFloor);
+		//System.out.println("Person búin til á hæð " + sourceFloor + " á leiðinni á hæð: "  + destinationFloor );
  		
 		return thread;  //this means that the testSuite will not wait for the threads to finish
+	}
+	
+	public Elevator addElevator() {
+		
+		Elevator elevator = new Elevator(6);
+		Thread thread = new Thread(elevator);
+		elevator.CurrentFloor = 0;
+		
+		//if( (personCount[elevator.CurrentFloor]) > 0)
+		thread.start();
+		
+		// halda utan um fjölda lyfta...
+		
+		
+		return elevator;
 	}
 
 	//Base function: definition must not change, but add your code
 	public int getCurrentFloorForElevator(int elevator) {
 
-		//dumb code, replace it!
-		return 1;
+		return elevatorLocation;
 	}
 
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleInElevator(int elevator) {
 		
-		//dumb code, replace it!
-		switch(elevator) {
-		case 1: return 1;
-		case 2: return 4;
-		default: return 3;
-		}
+		return ElevatorRiders;
 	}
 
 	//Base function: definition must not change, but add your code
