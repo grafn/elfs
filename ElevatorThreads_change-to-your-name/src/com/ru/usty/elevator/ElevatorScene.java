@@ -19,17 +19,19 @@ public class ElevatorScene {
 	
 	public static Semaphore personCountMutex;
 	
-	public static Semaphore elevatorWaitMutex;
+	public static Semaphore elevatorCountMutex;
 	
 	public static ElevatorScene scene;
 	
-	public boolean elevatorMayDie;
+	public static boolean elevatorMayDie;
 	
-	public int elevatorLocation = 0; // Gera array af location vísum til að geta unnið með margar lyftur í einu
+	public static int elevatorLocation = 0; // Gera array af location vísum til að geta unnið með margar lyftur í einu
 	
-	public int ElevatorRiders = 0;// Gera array fyrir riders
+	public static int ElevatorRiders = 0;// Gera array fyrir riders
 	
-	public void MoveElevatorUp() {
+	private Thread elevatorThread = null;
+	
+	public static void MoveElevatorUp() {
 		elevatorLocation++;
 	}
 	
@@ -37,23 +39,19 @@ public class ElevatorScene {
 		elevatorLocation--;
 	}
 	
-	public int[] PeopleCountForDestFloor;
+	public static int[] PeopleCountForDestFloor;
 	
 	
 	//TO SPEED THINGS UP WHEN TESTING,
 	//feel free to change this.  It will be changed during grading
-	public static final int VISUALIZATION_WAIT_TIME = 2000;  //milliseconds
+	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
 
-	private int numberOfFloors;
-	private int numberOfElevators;
-	
-	//private Thread elevatorThread = null	;
-	
-	
+	private static int numberOfFloors;
+	private int numberOfElevators;	
 	
 	private Elevator[] elevators; //= new Elevator[numberOfElevators];
 	
-	ArrayList<Integer> personCount; //use if you want but
+	static ArrayList<Integer> personCount; //use if you want but
 									//throw away and
 									//implement differently
 									//if it suits you
@@ -62,18 +60,18 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 		
-//		if(elevatorThread != null){   			// TODO: LOKA ÞEIM ELEVATOR ÞRÁÐUM SEM TIL ERU
-//			if(elevatorThread.isAlive()){
-//				
-//				try {
-//					elevatorThread.join();
-//					
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}
+		if(elevatorThread != null){   			// TODO: LOKA ÞEIM ELEVATOR ÞRÁÐUM SEM TIL ERU
+			if(elevatorThread.isAlive()){
+				
+				try {
+					elevatorThread.join();
+					
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 		
 		elevatorMayDie = true;
 
@@ -103,7 +101,7 @@ public class ElevatorScene {
 		
 		//floorQueue = new Semaphore(0); //læst í upphafi
 		personCountMutex = new Semaphore(1); //einn kemst i gegn og læsist svo
-		elevatorWaitMutex = new Semaphore(1);
+		elevatorCountMutex = new Semaphore(1);
 		
 //		elevatorThread = new Thread();
 //		elevatorThread.start();
@@ -119,12 +117,12 @@ public class ElevatorScene {
 		 * elevator threads to stop
 		 */
 		
-		this.numberOfFloors = numberOfFloors;
+		ElevatorScene.numberOfFloors = numberOfFloors;
 		this.numberOfElevators = numberOfElevators;
 
 		personCount = new ArrayList<Integer>();
 		for(int i = 0; i < numberOfFloors; i++) {
-			this.personCount.add(0);
+			ElevatorScene.personCount.add(0);
 		}
 		
 		if(exitedCount == null) {
@@ -134,7 +132,7 @@ public class ElevatorScene {
 			exitedCount.clear();
 		}
 		for(int i = 0; i < getNumberOfFloors(); i++) {
-			this.exitedCount.add(0);
+			ElevatorScene.exitedCount.add(0);
 		}
 		exitedCountMutex = new Semaphore(1);
 	}
@@ -168,11 +166,11 @@ public class ElevatorScene {
 	public Elevator addElevator() {
 		
 		Elevator elevator = new Elevator(6);
-		Thread thread = new Thread(elevator);
+		elevatorThread = new Thread(elevator);
 		elevator.CurrentFloor = 0;
 		
 		//if( (personCount[elevator.CurrentFloor]) > 0)
-		thread.start();
+		elevatorThread.start();
 		
 		// halda utan um fjölda lyfta...
 		
@@ -198,7 +196,7 @@ public class ElevatorScene {
 		return personCount.get(floor);
 	}
 	
-	public void decrementNumberOfPeopleWaitingAtFloor(int floor){
+	public static void decrementNumberOfPeopleWaitingAtFloor(int floor){
 		try {
 			ElevatorScene.personCountMutex.acquire();
 				personCount.set(floor,(personCount.get(floor)-1));
@@ -222,6 +220,32 @@ public class ElevatorScene {
 		}
 	}
 	
+	public void incrementNumberOfPeopleInElevator(int elevator){
+		try {
+			ElevatorScene.elevatorCountMutex.acquire();
+				ElevatorRiders++;
+			ElevatorScene.elevatorCountMutex.release();
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void decrementNumberOfPeopleInElevator(int elevator){
+		try {
+			ElevatorScene.elevatorCountMutex.acquire();
+			ElevatorRiders--;
+		ElevatorScene.elevatorCountMutex.release();
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
 	//Base function: definition must not change, but add your code if needed
 	public int getNumberOfFloors() {
 		return numberOfFloors;
@@ -229,7 +253,7 @@ public class ElevatorScene {
 
 	//Base function: definition must not change, but add your code if needed
 	public void setNumberOfFloors(int numberOfFloors) {
-		this.numberOfFloors = numberOfFloors;
+		ElevatorScene.numberOfFloors = numberOfFloors;
 	}
 
 	//Base function: definition must not change, but add your code if needed
@@ -256,10 +280,10 @@ public class ElevatorScene {
 		return (getNumberOfPeopleWaitingAtFloor(floor) > 0);
 	}
 
-	ArrayList<Integer> exitedCount = null;
+	static ArrayList<Integer> exitedCount = null;
 	public static Semaphore exitedCountMutex;
 
-	public void personExitsAtFloor(int floor) {
+	public static void personExitsAtFloor(int floor) {
 		try {
 			
 			exitedCountMutex.acquire();
