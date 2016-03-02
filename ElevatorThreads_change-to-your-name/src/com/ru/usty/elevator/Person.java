@@ -2,7 +2,7 @@ package com.ru.usty.elevator;
 
 public class Person implements Runnable{
 
-	int sourceFloor, destinationFloor;
+	int sourceFloor, destinationFloor, elevator;
 	
 	public Person(int sourceFloor, int destinationFloor){
 		
@@ -24,7 +24,7 @@ public class Person implements Runnable{
 		ElevatorScene.decrementNumberOfPeopleWaitingAtFloor(this.sourceFloor);
 		
 		//Person enters elevator
-		ElevatorScene.scene.incrementNumberOfPeopleInElevator(0);
+		ElevatorScene.scene.incrementNumberOfPeopleInElevator(0); //finna út hvaða lyfta er að hleypa inní sig
 		ElevatorScene.PeopleCountForDestFloor[this.destinationFloor]++;
 		
 		//Person waits to get out
@@ -43,5 +43,3 @@ public class Person implements Runnable{
 	}
 
 }
-
-

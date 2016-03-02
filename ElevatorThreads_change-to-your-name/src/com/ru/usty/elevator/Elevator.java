@@ -4,6 +4,7 @@ public class Elevator implements Runnable {
 
 	int CountOfCurrentElevatorRiders = 0;
 	int ElevatorSize = 6;
+	int elevatorID;
 	int CurrentFloor;
 	
 /*	public Elevator(int ElevatorSize) {
@@ -15,9 +16,10 @@ public class Elevator implements Runnable {
 		}
 	}*/
 	
-    public Elevator(int ElevatorSize) {
+    public Elevator(int ElevatorSize, int elevatorID) {
 		
 		this.ElevatorSize = ElevatorSize;
+		this.elevatorID = elevatorID;
 //		for(int i = 0; i < ElevatorSize; i++) {
 //			TheElevator[i] = null; // Búum til tóman array í byrjun 	
 //		}
@@ -38,7 +40,7 @@ public class Elevator implements Runnable {
             
             // Adding to the elevator while there is room in it
             for(int i = 0; i < (AvailableSpace); i++ ) {
-            	ElevatorScene.floorQueueInSemaphore[ElevatorScene.elevatorLocation].release();
+            	ElevatorScene.floorQueueInSemaphore[ElevatorScene.elevatorLocation[elevatorID]].release();
             	temp--;
             	System.out.println("Person " + i + " added to elevator");
             }
@@ -55,7 +57,7 @@ public class Elevator implements Runnable {
             	// Closing the release with an acquire if the elevator is leaving with empty spaces in it
             	for( int n = 0; n < temp; n++) {
             		try {
-						ElevatorScene.floorQueueInSemaphore[ElevatorScene.elevatorLocation].acquire();
+						ElevatorScene.floorQueueInSemaphore[ElevatorScene.elevatorLocation[elevatorID]].acquire();
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -63,16 +65,16 @@ public class Elevator implements Runnable {
             	}
             }
             
-            if(ElevatorScene.elevatorLocation == ( ElevatorScene.scene.getNumberOfFloors() - 1) ) {
-            	ElevatorScene.elevatorLocation = 0;
+            if(ElevatorScene.elevatorLocation[elevatorID] == ( ElevatorScene.scene.getNumberOfFloors() - 1) ) {
+            	ElevatorScene.elevatorLocation[elevatorID] = 0;
             }
             else {
-            	ElevatorScene.MoveElevatorUp();
+            	ElevatorScene.MoveElevatorUp(elevatorID);
             }
            
             
-            for(int m = 0; m < (ElevatorScene.PeopleCountForDestFloor[ElevatorScene.elevatorLocation]); m++ )  {
-            	ElevatorScene.GetTheHellOutSemaphore[ElevatorScene.elevatorLocation].release();
+            for(int m = 0; m < (ElevatorScene.PeopleCountForDestFloor[ElevatorScene.elevatorLocation[elevatorID]]); m++ )  {
+            	ElevatorScene.GetTheHellOutSemaphore[ElevatorScene.elevatorLocation[elevatorID]].release();
             }
         }
     }

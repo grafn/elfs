@@ -25,18 +25,18 @@ public class ElevatorScene {
 	
 	public static boolean elevatorMayDie;
 	
-	public static int elevatorLocation = 0; // Gera array af location vísum til að geta unnið með margar lyftur í einu
+	public static int[] elevatorLocation; // Gera array af location vísum til að geta unnið með margar lyftur í einu
 	
 	public static int ElevatorRiders = 0;// Gera array fyrir riders
 	
 	private Thread elevatorThread = null;
 	
-	public static void MoveElevatorUp() {
-		elevatorLocation++;
+	public static void MoveElevatorUp(int elevator) {
+		elevatorLocation[elevator]++;
 	}
 	
-	public void MoveElevatorDown() {
-		elevatorLocation--;
+	public void MoveElevatorDown(int elevator) {
+		elevatorLocation[elevator]--;
 	}
 	
 	public static int[] PeopleCountForDestFloor;
@@ -49,7 +49,7 @@ public class ElevatorScene {
 	private static int numberOfFloors;
 	private int numberOfElevators;	
 	
-	private Elevator[] elevators; //= new Elevator[numberOfElevators];
+	private Elevator[] elevators;
 	
 	static ArrayList<Integer> personCount; //use if you want but
 									//throw away and
@@ -77,10 +77,16 @@ public class ElevatorScene {
 		
 		elevators = new Elevator[numberOfElevators];
 		PeopleCountForDestFloor = new int[numberOfFloors];
+		elevatorLocation = new int[numberOfElevators]; 
+		
 		//elevatorThread = new Thread();
 		
 		floorQueueInSemaphore = new Semaphore[numberOfFloors];
 		GetTheHellOutSemaphore = new Semaphore[numberOfFloors];
+		
+		for(int i = 0; i < numberOfElevators; i++) {
+			elevatorLocation[i] = 0;
+		}
 		
 		for(int i = 0; i < numberOfFloors; i++) {
 			floorQueueInSemaphore[i] = new Semaphore(0);
@@ -95,7 +101,7 @@ public class ElevatorScene {
 		}
 		
 		for( int n = 0; n < numberOfElevators; n++) {
-			elevators[n] = addElevator();
+			elevators[n] = addElevator(n);
 			System.out.println("Elevator nr.: " + n + " búin til");
 		}
 		
@@ -169,9 +175,9 @@ public class ElevatorScene {
 		return thread;  //this means that the testSuite will not wait for the threads to finish
 	}
 	
-	public Elevator addElevator() {
+	public Elevator addElevator(int i) {
 		
-		Elevator elevator = new Elevator(6);
+		Elevator elevator = new Elevator(6,i);
 		elevatorThread = new Thread(elevator);
 		elevator.CurrentFloor = 0;
 		
@@ -187,7 +193,7 @@ public class ElevatorScene {
 	//Base function: definition must not change, but add your code
 	public int getCurrentFloorForElevator(int elevator) {
 
-		return elevatorLocation;
+		return elevatorLocation[elevator];
 	}
 
 	//Base function: definition must not change, but add your code
@@ -241,8 +247,8 @@ public class ElevatorScene {
 	public void decrementNumberOfPeopleInElevator(int elevator){
 		try {
 			ElevatorScene.elevatorCountMutex.acquire();
-			ElevatorRiders--;
-		ElevatorScene.elevatorCountMutex.release();
+				ElevatorRiders--;
+			ElevatorScene.elevatorCountMutex.release();
 			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
