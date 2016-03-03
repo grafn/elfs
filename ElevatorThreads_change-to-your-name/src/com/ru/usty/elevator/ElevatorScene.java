@@ -27,7 +27,7 @@ public class ElevatorScene {
 	
 	public static int[] elevatorLocation; // Gera array af location vísum til að geta unnið með margar lyftur í einu
 	
-	public static int ElevatorRiders = 0;// Gera array fyrir riders
+	public static int[] elevatorRiders;// Gera array fyrir riders
 	
 	private Thread elevatorThread = null;
 	
@@ -44,7 +44,7 @@ public class ElevatorScene {
 	
 	//TO SPEED THINGS UP WHEN TESTING,
 	//feel free to change this.  It will be changed during grading
-	public static final int VISUALIZATION_WAIT_TIME = 2000;  //milliseconds
+	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
 
 	private static int numberOfFloors;
 	private int numberOfElevators;	
@@ -60,7 +60,9 @@ public class ElevatorScene {
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
 		
-		if(elevatorThread != null){   			// TODO: LOKA ÞEIM ELEVATOR ÞRÁÐUM SEM TIL ERU
+		elevatorMayDie = true;
+		
+		if(elevatorThread != null){   			
 			if(elevatorThread.isAlive()){
 				
 				try {
@@ -72,12 +74,15 @@ public class ElevatorScene {
 				}
 			}
 		}
+		
+		elevatorMayDie = false;
 
 		scene = this;
 		
 		elevators = new Elevator[numberOfElevators];
 		PeopleCountForDestFloor = new int[numberOfFloors];
-		elevatorLocation = new int[numberOfElevators]; 
+		elevatorLocation = new int[numberOfElevators];
+		elevatorRiders = new int[numberOfElevators];
 		
 		//elevatorThread = new Thread();
 		
@@ -86,6 +91,10 @@ public class ElevatorScene {
 		
 		for(int i = 0; i < numberOfElevators; i++) {
 			elevatorLocation[i] = 0;
+		}
+		
+		for(int i = 0; i < numberOfElevators; i++) {
+			elevatorRiders[i] = 0;
 		}
 		
 		for(int i = 0; i < numberOfFloors; i++) {
@@ -100,8 +109,19 @@ public class ElevatorScene {
 			PeopleCountForDestFloor[i] = 0;
 		}
 		
+		int q = 0;
 		for( int n = 0; n < numberOfElevators; n++) {
 			elevators[n] = addElevator(n);
+			if ( numberOfElevators <= numberOfFloors ) {
+				elevatorLocation[n] = n;
+			}
+			else {
+				elevatorLocation[n] = q;
+				q++;
+				if(q == numberOfFloors) {
+					q = 0;
+				}
+			}
 			System.out.println("Elevator nr.: " + n + " búin til");
 		}
 		
@@ -179,9 +199,7 @@ public class ElevatorScene {
 		
 		Elevator elevator = new Elevator(6,i);
 		elevatorThread = new Thread(elevator);
-		elevator.CurrentFloor = 0;
 		
-		//if( (personCount[elevator.CurrentFloor]) > 0)
 		elevatorThread.start();
 		
 		// halda utan um fjölda lyfta...
@@ -199,7 +217,7 @@ public class ElevatorScene {
 	//Base function: definition must not change, but add your code
 	public int getNumberOfPeopleInElevator(int elevator) {
 		
-		return ElevatorRiders;
+		return elevatorRiders[elevator];
 	}
 
 	//Base function: definition must not change, but add your code
@@ -235,7 +253,7 @@ public class ElevatorScene {
 	public void incrementNumberOfPeopleInElevator(int elevator){
 		try {
 			ElevatorScene.elevatorCountMutex.acquire();
-				ElevatorRiders++;
+				elevatorRiders[elevator]++;
 			ElevatorScene.elevatorCountMutex.release();
 			
 		} catch (InterruptedException e) {
@@ -247,7 +265,7 @@ public class ElevatorScene {
 	public void decrementNumberOfPeopleInElevator(int elevator){
 		try {
 			ElevatorScene.elevatorCountMutex.acquire();
-				ElevatorRiders--;
+				elevatorRiders[elevator]--;
 			ElevatorScene.elevatorCountMutex.release();
 			
 		} catch (InterruptedException e) {
@@ -284,6 +302,17 @@ public class ElevatorScene {
 	public boolean isElevatorOpen(int elevator) {
 
 		return isButtonPushedAtFloor(getCurrentFloorForElevator(elevator));
+	}
+	
+	public int findAvailableElevator(int sourceFloor) {
+		for(int i = 0; i < numberOfElevators; i++) {
+			if(elevators[i].CurrentFloor == sourceFloor) {
+				if(elevatorRiders[i] < elevators[i].ElevatorSize) {
+					return i;
+				}
+			}
+		}
+		return -1;
 	}
 	//Base function: no need to change, just for visualization
 	//Feel free to use it though, if it helps

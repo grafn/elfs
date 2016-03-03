@@ -2,10 +2,10 @@ package com.ru.usty.elevator;
 
 public class Elevator implements Runnable {
 
-	int CountOfCurrentElevatorRiders = 0;
 	int ElevatorSize = 6;
 	int elevatorID;
 	int CurrentFloor;
+//	boolean haldaLyftuKeyrandi;
 	
 /*	public Elevator(int ElevatorSize) {
 		
@@ -30,16 +30,34 @@ public class Elevator implements Runnable {
        
 		while(true) {
             
-        	if(ElevatorScene.elevatorMayDie){
+//			haldaLyftuKeyrandi = true;
+//			for(int p = 0; p < ElevatorScene.scene.getNumberOfFloors(); p++) {
+//				haldaLyftuKeyrandi = ElevatorScene.scene.isButtonPushedAtFloor(p); // Skilar true ef það er einhver að bíða
+//				if (haldaLyftuKeyrandi == true) {
+//					break;
+//				}
+//			}
+//			haldaLyftuKeyrandi = false;
+//			for(int p = 0; p < ElevatorScene.scene.getNumberOfFloors(); p++) {
+//				if(ElevatorScene.scene.personCount.get(p) > 0) {
+//					haldaLyftuKeyrandi = true;
+//				}
+//			} && (haldaLyftuKeyrandi == false)
+			
+        	if(ElevatorScene.elevatorMayDie ){
         		System.out.println("Return í Elevator");
+        		
+        		// gengið frá öllum þráðum
+        		
                 return;
             }
             
-            int AvailableSpace = this.ElevatorSize - ElevatorScene.ElevatorRiders;
+            int AvailableSpace = this.ElevatorSize - ElevatorScene.elevatorRiders[this.elevatorID];
             int temp = AvailableSpace;
             
             // Adding to the elevator while there is room in it
             for(int i = 0; i < (AvailableSpace); i++ ) {
+            	
             	ElevatorScene.floorQueueInSemaphore[ElevatorScene.elevatorLocation[elevatorID]].release();
             	temp--;
             	System.out.println("Person " + i + " added to elevator");
