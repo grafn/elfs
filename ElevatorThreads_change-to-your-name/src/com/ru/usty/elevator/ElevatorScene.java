@@ -49,7 +49,7 @@ public class ElevatorScene {
 	private static int numberOfFloors;
 	private int numberOfElevators;	
 	
-	private Elevator[] elevators;
+	public static Elevator[] elevators;
 	
 	static ArrayList<Integer> personCount; //use if you want but
 									//throw away and
