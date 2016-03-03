@@ -112,17 +112,18 @@ public class ElevatorScene {
 		int q = 0;
 		for( int n = 0; n < numberOfElevators; n++) {
 			elevators[n] = addElevator(n);
-			if ( numberOfElevators <= numberOfFloors ) {
-				elevatorLocation[n] = n;
-			}
-			else {
-				elevatorLocation[n] = q;
-				q++;
-				if(q == numberOfFloors) {
-					q = 0;
-				}
-			}
-			System.out.println("Elevator nr.: " + n + " búin til");
+			elevatorLocation[n] = 0;
+//			if ( numberOfElevators <= numberOfFloors ) {
+//				elevatorLocation[n] = n;
+//			}
+//			else {
+//				elevatorLocation[n] = q;
+//				q++;
+//				if(q == numberOfFloors) {
+//					q = 0;
+//				}
+//			}
+//			System.out.println("Elevator nr.: " + n + " búin til");
 		}
 		
 		

@@ -27,7 +27,7 @@ public class Person implements Runnable{
 				elevatorIndex = n;
 				break;
 			}
-			if( (ElevatorScene.elevatorRiders[elevatorIndex] >= 6)  ) {
+			if( (ElevatorScene.elevatorRiders[elevatorIndex] >= 6 ) && (( (elevatorIndex + 1) < ElevatorScene.elevators.length))  ) {
 				elevatorIndex++;
 			}
 		}
